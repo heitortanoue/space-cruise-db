@@ -13,7 +13,7 @@ def query_data():
         cur = conn.cursor()
 
         # query from consultas.sql
-        cur.execute(open("consultas.sql", "r").read())
+        cur.execute(open("./sql/consultas.sql", "r").read())
 
         rows = cur.fetchall()
         print("Number of rows: ", cur.rowcount)

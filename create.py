@@ -13,7 +13,7 @@ def create_tables():
         cur = conn.cursor()
 
         # create tables from esquema.sql
-        cur.execute(open("esquema.sql", "r").read())
+        cur.execute(open("./sql/esquema.sql", "r").read())
         
         # close communication with the PostgreSQL database server
         cur.close()
