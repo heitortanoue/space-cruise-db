@@ -24,7 +24,27 @@ A estrutura do projeto é delineada pelas seguintes diretórios e arquivos essen
 
 ## 3 - Instruções de Uso
 
-(descreva aqui como instalar, configurar e executar o sistema)
+1. Instale um servidor local postgreSQL no seu PC, a depender do seu sistema operacional
+
+2. Preencha as informações do seu banco de dados correspondente com o arquivo `database.ini`, ou então altere-o com as suas configurações de host, database, user, password, port
+
+3. Verifique se você tem instalado o Python3
+```
+python3 --version
+```
+
+4. Instale o módulo psycopg2 para conectar a base de dados postgreSQL com seu programa em Python
+```
+pip install psycopg2
+```
+
+5. Execute os comandos conforme a operação que deseja realizar
+  - `create.py`: criar tabelas do `esquema.sql`
+  - `insert.py`: inserir dados do `dados.sql`
+  - `consultas.py`: realizar consultas do `consultas.sql`
+```
+python3 <nome-arquivo.py>
+```
 
 ## 4 - Contribuições
 
