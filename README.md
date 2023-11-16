@@ -41,7 +41,7 @@ pip install psycopg2
 5. Execute os comandos conforme a operação que deseja realizar
   - `create.py`: criar tabelas do `esquema.sql`
   - `insert.py`: inserir dados do `dados.sql`
-  - `consultas.py`: realizar consultas do `consultas.sql`
+  - `query.py`: realizar consultas do `consultas.sql`
 ```
 python3 <nome-arquivo.py>
 ```
