@@ -14,6 +14,20 @@ def create_tables():
 
         # create tables from esquema.sql
         cur.execute(open("./sql/esquema.sql", "r").read())
+
+        # Execute the query to count all tables
+        cur.execute("SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public'")
+
+        # Fetch the result
+        count = cur.fetchone()[0]
+
+        # Print the count of tables
+        print(f"Created {count} tables:")
+
+        # Execute the query to list all tables names
+        cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+        names = cur.fetchall()
+        print(names)
         
         # close communication with the PostgreSQL database server
         cur.close()

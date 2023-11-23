@@ -20,6 +20,8 @@ def insert_data():
 
         # commit the changes to the database
         conn.commit()
+
+        print("Tables filled successfully")
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
