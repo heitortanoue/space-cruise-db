@@ -13,24 +13,24 @@ ORDER BY
     pi.ORDEM;
 
 -- Consultar as próximas viagens que precisam de tripulantes / capitão
-SELECT
-    v.NAVE,
-    v.DATA,
-    m.TRIPULANTES_NECESSARIOS,
-    COUNT(f.CPI) AS Tripulantes_Alocados
-FROM
-    VIAGEM v
-    JOIN NAVE n ON v.NAVE = n.NUMERO_SERIE
-    JOIN MODELO_NAVE m ON n.MODELO_NAVE = m.NOME
-    LEFT JOIN FUNCIONARIO f ON v.CPI_CAPITAO = f.CPI
-WHERE
-    v.DATA > CURRENT_DATE
-GROUP BY
-    v.NAVE,
-    v.DATA,
-    m.TRIPULANTES_NECESSARIOS
-HAVING
-    COUNT(f.CPI) < m.TRIPULANTES_NECESSARIOS;
+    SELECT
+        v.NAVE,
+        v.DATA,
+        m.TRIPULANTES_NECESSARIOS,
+        COUNT(f.CPI) AS Tripulantes_Alocados
+    FROM
+        VIAGEM v
+        JOIN NAVE n ON v.NAVE = n.NUMERO_SERIE
+        JOIN MODELO_NAVE m ON n.MODELO_NAVE = m.NOME
+        LEFT JOIN FUNCIONARIO f ON v.CPI_CAPITAO = f.CPI
+    WHERE
+        v.DATA > CURRENT_DATE
+    GROUP BY
+        v.NAVE,
+        v.DATA,
+        m.TRIPULANTES_NECESSARIOS
+    HAVING
+        COUNT(f.CPI) < m.TRIPULANTES_NECESSARIOS;
 
 -- Verificação de quartos dísponíveis para uma data
 SELECT
@@ -176,13 +176,13 @@ WHERE
 
 -- Capitães disponíveis para pilotar uma viagem
 SELECT
-    C .CPI,
-    C .FORMACAO,
-    C .LICENCA
+    c.CPI,
+    c.FORMACAO,
+    c.LICENCA
 FROM
-    CAPITAO C
-    JOIN LICENCAS_PERMITIDAS lp ON C .LICENCA = lp.LICENCA
-    LEFT JOIN VIAGEM v ON C .CPI = v.CPI_CAPITAO
+    CAPITAO c
+    JOIN LICENCAS_PERMITIDAS lp ON c.LICENCA = lp.LICENCA
+    LEFT JOIN VIAGEM v ON c.CPI = v.CPI_CAPITAO
     AND v.DATA = '{{DATA_DA_VIAGEM}}'
 WHERE
     v.CPI_CAPITAO IS NULL
