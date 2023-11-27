@@ -47,6 +47,7 @@ WHERE
 
 -- Lista de passageiros para uma viagem
 SELECT
+    p.CPI,
     p.NOME AS Passageiro
 FROM
     VIAGEM v
@@ -60,6 +61,7 @@ WHERE
 
 -- Restrições alimentares dos passageiros
 SELECT
+    p.CPI,
     p.NOME AS Passageiro,
     ra.RESTRICAO
 FROM
@@ -132,7 +134,7 @@ GROUP BY
 
 -- Funcionários comuns que ganham mais que a média de seu cargo
 SELECT
-    p.CPI,
+    f.NUM_FUNCIONAL,
     p.NOME,
     f.SALARIO,
     c.PROFISSAO_ESP,
