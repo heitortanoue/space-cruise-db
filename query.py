@@ -25,7 +25,7 @@ def query_data(query):
                 else:
                     print(colored(f"{campo}: ", 'cyan'), end="")
                 valor = input()
-                query = set_query_fields(query, {campo: valor})
+                query = set_query_fields(query, {campo: valor.upper()})
 
         # Executa a consulta selecionada
         cur.execute(query)

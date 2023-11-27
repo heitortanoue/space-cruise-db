@@ -130,6 +130,45 @@ CREATE TABLE QUARTO_RESERVA (
     CONSTRAINT CK_QUARTO_RESERVA_DISPONIBILIDADE CHECK(DISPONIBILIDADE IN('0', '1'))
 );
 
+CREATE
+OR REPLACE FUNCTION verificar_disponibilidade_quarto() RETURNS TRIGGER AS $$ BEGIN
+    -- Verifica se a disponibilidade do quarto para a reserva é 1
+    IF NOT EXISTS (
+        SELECT
+            1
+        FROM
+            quarto_reserva
+        WHERE
+            id = NEW .quarto_reserva
+            AND disponibilidade = '1'
+    ) THEN RAISE
+    EXCEPTION
+        'Nao e possível reservar este quarto, pois ele nao esta disponivel.';
+
+END IF;
+
+RETURN NEW;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
+CREATE
+OR REPLACE FUNCTION alterar_disponibilidade_quarto() RETURNS TRIGGER AS $$ BEGIN
+    -- Atualiza a disponibilidade para '0' (indisponível) assim que uma reserva é feita
+    UPDATE
+        quarto_reserva
+    SET
+        disponibilidade = '0'
+    WHERE
+        id = NEW .quarto_reserva;
+
+RETURN NEW;
+
+END;
+
+$$ LANGUAGE plpgsql;
+
 CREATE TABLE RESERVAS (
     QUARTO_RESERVA INTEGER NOT NULL,
     PESSOA CHAR(14) NOT NULL,
@@ -137,6 +176,14 @@ CREATE TABLE RESERVAS (
     CONSTRAINT FK_RESERVA_QUARTO FOREIGN KEY(QUARTO_RESERVA) REFERENCES quarto_reserva(ID),
     CONSTRAINT FK_RESERVA_PESSOA FOREIGN KEY(PESSOA) REFERENCES pessoa(CPI)
 );
+
+CREATE TRIGGER verificar_disponibilidade_quarto_trigger BEFORE
+INSERT
+    ON reservas FOR EACH ROW EXECUTE FUNCTION verificar_disponibilidade_quarto();
+
+CREATE TRIGGER alterar_disponibilidade_quarto_trigger AFTER
+INSERT
+    ON reservas FOR EACH ROW EXECUTE FUNCTION alterar_disponibilidade_quarto();
 
 CREATE TABLE HOSPEDAGEM (
     QUARTO_RESERVA INTEGER NOT NULL,

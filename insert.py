@@ -14,7 +14,7 @@ def insert_data():
         cur = conn.cursor()
 
         # execute the INSERT statement
-        cur.execute(open("./sql/dados.sql", "r").read())
+        cur.execute(open("./sql/dados.sql", "r", encoding='utf-8').read())
 
         # close communication with the PostgreSQL database server
         cur.close()
