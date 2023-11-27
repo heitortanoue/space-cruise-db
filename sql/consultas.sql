@@ -241,6 +241,7 @@ ORDER BY
 -- Gastos por passageiro, considerando todas as reservas feitas por ele
 SELECT
     p.NOME AS Passageiro,
+    p.CPI AS CPI,
     COALESCE(sp.Soma_Produtos, 0) AS "Soma Produtos",
     COALESCE(ss.Soma_Servicos, 0) AS "Soma Serviços",
     COALESCE(sh.Soma_Hospedagem, 0) AS "Soma Hospedagem",
@@ -307,3 +308,47 @@ GROUP BY
     pess.PLANETA_ORIGEM
 ORDER BY
     Soma_Total DESC;
+
+-- Serviços disponíveis para uma viagem
+SELECT
+    p.NOME AS Nome_Funcionario,
+    s.NOME AS Nome_Servico,
+    sp.HORARIO,
+    s.VALOR AS Valor_Servico
+FROM
+    SERVICO_PRESTADO sp
+INNER JOIN
+    COMUM c ON sp.FUNCIONARIO_COMUM = c.CPI
+INNER JOIN
+    FUNCIONARIO f ON c.CPI = f.CPI
+INNER JOIN
+    PESSOA p ON f.CPI = p.CPI
+INNER JOIN
+    SERVICOS s ON sp.COD_SERVICO = s.COD_BARRAS
+LEFT JOIN
+    CONTRATACAO_SERVICO cs ON sp.FUNCIONARIO_COMUM = cs.FUNCIONARIO AND sp.HORARIO = cs.HORARIO
+WHERE
+    cs.FUNCIONARIO IS NULL
+    AND sp.HORARIO > CURRENT_TIME
+    AND EXISTS (
+        SELECT 1
+        FROM TRABALHO_COMUM tc
+        WHERE tc.CPI_COMUM = sp.FUNCIONARIO_COMUM
+        AND tc.NAVE_VIAGEM = '{{Nave Viagem}}'
+        AND sp.HORARIO > CURRENT_TIME
+    );
+
+-- Próximas viagens que realizam um determinado itinerário
+SELECT
+    v.NAVE,
+    v.DATA,
+    v.CPI_CAPITAO,
+    v.ITINERARIO,
+    v.DURACAO
+FROM
+    VIAGEM v
+WHERE
+    v.ITINERARIO = '{{Itinerário desejado}}'
+    AND v.DATA >= CURRENT_DATE
+ORDER BY
+    v.DATA ASC;
