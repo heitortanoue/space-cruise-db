@@ -33,15 +33,15 @@ A estrutura do projeto é delineada pelas seguintes diretórios e arquivos essen
 python3 --version
 ```
 
-4. Instale o módulo psycopg2 para conectar a base de dados postgreSQL com seu programa em Python
+4. Instale as bibliotecas requisito para o código com o comando
 ```
-pip install psycopg2
+pip install -r requirements.txt
 ```
 
 5. Execute os comandos conforme a operação que deseja realizar
   - `create.py`: criar tabelas do `esquema.sql`
   - `insert.py`: inserir dados do `dados.sql`
-  - `consultas.py`: realizar consultas do `consultas.sql`
+  - `query.py`: realizar consultas do `consultas.sql`
 ```
 python3 <nome-arquivo.py>
 ```
