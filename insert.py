@@ -1,13 +1,14 @@
 #!/usr/bin/python
 
 import psycopg2
+from termcolor import colored
 from config import config
 
 def insert_data():
     conn = None
     try:
         params = config()
-      
+
         # connect to the PostgreSQL server
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
@@ -21,7 +22,7 @@ def insert_data():
         # commit the changes to the database
         conn.commit()
 
-        print("Tables filled successfully")
+        print(colored("Dados inseridos com sucesso.", 'green'))
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
     finally:
