@@ -238,53 +238,54 @@ LEFT JOIN (
 ORDER BY
     itin.NOME;
 
--- Gastos por passageiro, considerando todas as viagens/reservas
+-- Gastos por passageiro, considerando todas as reservas feitas por ele
 SELECT
-    pess.NOME AS Passageiro,
-    COALESCE(prod.Soma_Produtos, 0) AS Soma_Produtos,
-    COALESCE(serv.Soma_Servicos, 0) AS Soma_Servicos,
-    COALESCE(hosp.Soma_Hospedagem, 0) AS Soma_Hospedagem,
-    COALESCE(prod.Soma_Produtos, 0) + COALESCE(serv.Soma_Servicos, 0) + COALESCE(hosp.Soma_Hospedagem, 0) AS Soma_Total
+    p.NOME AS Passageiro,
+    COALESCE(sp.Soma_Produtos, 0) AS "Soma Produtos",
+    COALESCE(ss.Soma_Servicos, 0) AS "Soma Serviços",
+    COALESCE(sh.Soma_Hospedagem, 0) AS "Soma Hospedagem",
+    COALESCE(sp.Soma_Produtos, 0) + COALESCE(ss.Soma_Servicos, 0) + COALESCE(sh.Soma_Hospedagem, 0) AS "Soma Total"
 FROM
-    PASSAGEIRO pass
-JOIN PESSOA pess ON pass.CPI = pess.CPI
-LEFT JOIN (
-    SELECT
-        hosp.PASSAGEIRO,
-        SUM(prod.VALOR * comp.QUANTIDADE) AS Soma_Produtos
-    FROM
-        HOSPEDAGEM hosp
-    JOIN RESERVAS res ON hosp.QUARTO_RESERVA = res.QUARTO_RESERVA
-    JOIN COMPRA comp ON res.QUARTO_RESERVA = comp.QUARTO_RESERVA
-    JOIN PRODUTOS prod ON comp.COD_BARRAS = prod.COD_BARRAS
-    GROUP BY
-        hosp.PASSAGEIRO
-) prod ON pass.CPI = prod.PASSAGEIRO
-LEFT JOIN (
-    SELECT
-        hosp.PASSAGEIRO,
-        SUM(serv.VALOR) AS Soma_Servicos
-    FROM
-        HOSPEDAGEM hosp
-    JOIN RESERVAS res ON hosp.QUARTO_RESERVA = res.QUARTO_RESERVA
-    JOIN CONTRATACAO_SERVICO contr ON res.QUARTO_RESERVA = contr.QUARTO_RESERVA
-    JOIN SERVICO_PRESTADO serpre ON contr.FUNCIONARIO = serpre.FUNCIONARIO_COMUM AND contr.HORARIO = serpre.HORARIO
-    JOIN SERVICOS serv ON serpre.COD_SERVICO = serv.COD_BARRAS
-    GROUP BY
-        hosp.PASSAGEIRO
-) serv ON pass.CPI = serv.PASSAGEIRO
-LEFT JOIN (
-    SELECT
-        hosp.PASSAGEIRO,
-        SUM(qres.VALOR) AS Soma_Hospedagem
-    FROM
-        HOSPEDAGEM hosp
-    JOIN QUARTO_RESERVA qres ON hosp.QUARTO_RESERVA = qres.ID
-    GROUP BY
-        hosp.PASSAGEIRO
-) hosp ON pass.CPI = hosp.PASSAGEIRO
-ORDER BY
-    Soma_Total DESC;
+    PASSAGEIRO pa
+INNER JOIN
+    PESSOA p ON pa.CPI = p.CPI
+LEFT JOIN
+    (SELECT
+         r.PESSOA,
+         SUM(pr.VALOR * c.QUANTIDADE) AS Soma_Produtos
+     FROM
+         COMPRA c
+     INNER JOIN
+         RESERVAS r ON c.QUARTO_RESERVA = r.QUARTO_RESERVA
+     INNER JOIN
+         PRODUTOS pr ON c.COD_BARRAS = pr.COD_BARRAS
+     GROUP BY
+         r.PESSOA) sp ON p.CPI = sp.PESSOA
+LEFT JOIN
+    (SELECT
+         r.PESSOA,
+         SUM(s.VALOR) AS Soma_Servicos
+     FROM
+         CONTRATACAO_SERVICO cs
+     INNER JOIN
+         RESERVAS r ON cs.QUARTO_RESERVA = r.QUARTO_RESERVA
+     INNER JOIN
+         SERVICO_PRESTADO sp ON cs.FUNCIONARIO = sp.FUNCIONARIO_COMUM AND cs.HORARIO = sp.HORARIO
+     INNER JOIN
+         SERVICOS s ON sp.COD_SERVICO = s.COD_BARRAS
+     GROUP BY
+         r.PESSOA) ss ON p.CPI = ss.PESSOA
+LEFT JOIN
+    (SELECT
+         r.PESSOA,
+         SUM(qr.VALOR) AS Soma_Hospedagem
+     FROM
+         RESERVAS r
+     INNER JOIN
+         QUARTO_RESERVA qr ON r.QUARTO_RESERVA = qr.ID
+     GROUP BY
+         r.PESSOA) sh ON p.CPI = sh.PESSOA;
+
 
 -- Gastos por planeta de origem
 SELECT
