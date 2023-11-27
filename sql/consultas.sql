@@ -189,154 +189,51 @@ WHERE
     AND lp.NOME_MODELO = '{{MODELO_NAVE}}';
 
 
-
--- Comissários Disponíveis para uma Viagem
+-- Gastos por itinerário
 SELECT
-    C.*
+    itin.NOME AS Nome_Itinerario,
+    COALESCE(prod.Soma_Produtos, 0) AS Soma_Produtos,
+    COALESCE(serv.Soma_Servicos, 0) AS Soma_Servicos,
+    COALESCE(hosp.Soma_Hospedagem, 0) AS Soma_Hospedagem,
+    COALESCE(prod.Soma_Produtos, 0) + COALESCE(serv.Soma_Servicos, 0) + COALESCE(hosp.Soma_Hospedagem, 0) AS Soma_Total
 FROM
-    COMISSARIO C
-WHERE
-    NOT EXISTS (
-        SELECT
-            *
-        FROM
-            VIAGEM v
-        WHERE
-            v.DATA = '{{DATA_DA_VIAGEM}}'
-            AND v.CPI_COMISSARIO = C .CPI
-    );
-
--- Consultar funcionários por profissão
-SELECT
-    f.NUM_FUNCIONAL,
-    p.NOME,
-    f.CARGO,
-    f.SALARIO
-FROM
-    FUNCIONARIO f
-    JOIN PESSOA p ON f.CPI = p.CPI
-WHERE
-    f.CARGO = '{{PROFISSAO}}';
-
--- Consultar reservas recentes
-SELECT
-    r.QUARTO_RESERVA,
-    r.DATA_RESERVA,
-    r.DATA_VIAGEM,
-    r.PESSOA,
-    r.PAGAMENTO,
-    r.VALOR,
-    r.PAGO,
-    r.CANCELADO
-FROM
-    RESERVAS r
-WHERE
-    r.DATA_RESERVA > CURRENT_DATE - 30;
-
--- Tripulação necessária para uma viagem com um modelo de nave
-SELECT
-    m.NOME AS modelo_nave,
-    m.TRIPULANTES_NECESSARIOS,
-    COUNT(C .CPI) AS tripulantes_alocados
-FROM
-    MODELO_NAVE m
-    LEFT JOIN FUNCIONARIO C ON m.NOME = C .CARGO
-WHERE
-    m.NOME = '{{MODELO_NAVE}}'
-GROUP BY
-    m.NOME,
-    m.TRIPULANTES_NECESSARIOS;
-
--- Ganhos/lucro de cada itinerário
-SELECT
-    i.NOME AS itinerario,
-    SUM(p.VALOR * C .QUANTIDADE) AS ganhos
-FROM
-    ITINERARIO i
-    JOIN PRODUTOS_ITINERARIO pi ON i.NOME = pi.NOME_ITINERARIO
-    JOIN PRODUTOS p ON pi.COD_BARRAS_PRODUTO = p.COD_BARRAS
-    JOIN COMPRA C ON p.COD_BARRAS = C .COD_BARRAS
-GROUP BY
-    i.NOME;
-
--- Lista de passageiros em cada quarto em uma viagem
-SELECT
-    v.NAVE,
-    v.DATA,
-    q.MODELO_NAVE,
-    q.NUMERO,
-    p.NOME AS passageiro
-FROM
-    VIAGEM v
-    JOIN QUARTO_RESERVA qr ON v.NAVE = qr.NAVE_VIAGEM
-    AND v.DATA = qr.DATA_VIAGEM
-    JOIN QUARTO q ON qr.MODELO_NAVE_QUARTO = q.MODELO_NAVE
-    AND qr.NUMERO_QUARTO = q.NUMERO
-    JOIN HOSPEDAGEM h ON qr.ID = h.QUARTO_RESERVA
-    JOIN RESERVAS r ON h.QUARTO_RESERVA = r.QUARTO_RESERVA
-    JOIN PESSOA p ON r.PESSOA = p.CPI
-WHERE
-    v.NAVE = '{{NUMERO_SERIE_NAVE}}'
-    AND v.DATA = '{{DATA_DA_VIAGEM}}';
-
--- Balanço de despesas de um passageiro em uma viagem
-SELECT
-    v.NAVE,
-    v.DATA,
-    p.NOME AS passageiro,
-    SUM(p.VALOR * C .QUANTIDADE) AS despesas
-FROM
-    VIAGEM v
-    JOIN QUARTO_RESERVA qr ON v.NAVE = qr.NAVE_VIAGEM
-    AND v.DATA = qr.DATA_VIAGEM
-    JOIN QUARTO q ON qr.MODELO_NAVE_QUARTO = q.MODELO_NAVE
-    AND qr.NUMERO_QUARTO = q.NUMERO
-    JOIN HOSPEDAGEM h ON qr.ID = h.QUARTO_RESERVA
-    JOIN RESERVAS r ON h.QUARTO_RESERVA = r.QUARTO_RESERVA
-    JOIN PESSOA p ON r.PESSOA = p.CPI
-    JOIN COMPRA C ON p.CPI = C .CPI
-    JOIN PRODUTOS pr ON C .COD_BARRAS = pr.COD_BARRAS
-GROUP BY
-    v.NAVE,
-    v.DATA,
-    p.NOME;
-
--- Soma dos gastos de todos os passageiros a partir de seu planeta origem
-SELECT
-    p.PLANETA_ORIGEM,
-    SUM(p.VALOR * C .QUANTIDADE) AS gastos
-FROM
-    PESSOA p
-    JOIN COMPRA C ON p.CPI = C .CPI
-    JOIN PRODUTOS pr ON C .COD_BARRAS = pr.COD_BARRAS
-GROUP BY
-    p.PLANETA_ORIGEM;
-
--- Serviços disponíveis com funcionário e turno para uma viagem
-SELECT
-    v.NAVE,
-    v.DATA,
-    s.NOME AS servico,
-    f.CARGO,
-    f.NUM_FUNCIONAL,
-    t.TURNO
-FROM
-    VIAGEM v
-    JOIN SERVICOS s ON v.NAVE = s.NAVE_VIAGEM
-    AND v.DATA = s.DATA_VIAGEM
-    JOIN FUNCIONARIO f ON s.CARGO_FUNCIONARIO = f.CARGO
-    JOIN TURNO t ON s.TURNO_FUNCIONARIO = t.TURNO
-WHERE
-    v.NAVE = '{{NUMERO_SERIE_NAVE}}'
-    AND v.DATA = '{{DATA_DA_VIAGEM}}';
-
--- Próximas viagens disponíveis de um itinerário
-SELECT
-    i.NOME AS itinerario,
-    v.NAVE,
-    v.DATA
-FROM
-    ITINERARIO i
-    JOIN VIAGEM v ON i.NOME = v.ITINERARIO
-WHERE
-    v.DATA > CURRENT_DATE;
+    ITINERARIO itin
+LEFT JOIN (
+    SELECT
+        viag.ITINERARIO,
+        SUM(prod.VALOR * comp.QUANTIDADE) AS Soma_Produtos
+    FROM
+        VIAGEM viag
+    JOIN QUARTO_RESERVA qres ON viag.NAVE = qres.NAVE_VIAGEM AND viag.DATA = qres.DATA_VIAGEM
+    JOIN RESERVAS res ON qres.ID = res.QUARTO_RESERVA
+    JOIN COMPRA comp ON res.QUARTO_RESERVA = comp.QUARTO_RESERVA
+    JOIN PRODUTOS prod ON comp.COD_BARRAS = prod.COD_BARRAS
+    GROUP BY
+        viag.ITINERARIO
+) prod ON itin.NOME = prod.ITINERARIO
+LEFT JOIN (
+    SELECT
+        viag.ITINERARIO,
+        SUM(serv.VALOR) AS Soma_Servicos
+    FROM
+        VIAGEM viag
+    JOIN QUARTO_RESERVA qres ON viag.NAVE = qres.NAVE_VIAGEM AND viag.DATA = qres.DATA_VIAGEM
+    JOIN RESERVAS res ON qres.ID = res.QUARTO_RESERVA
+    JOIN CONTRATACAO_SERVICO contr ON res.QUARTO_RESERVA = contr.QUARTO_RESERVA
+    JOIN SERVICO_PRESTADO serpre ON contr.FUNCIONARIO = serpre.FUNCIONARIO_COMUM AND contr.HORARIO = serpre.HORARIO
+    JOIN SERVICOS serv ON serpre.COD_SERVICO = serv.COD_BARRAS
+    GROUP BY
+        viag.ITINERARIO
+) serv ON itin.NOME = serv.ITINERARIO
+LEFT JOIN (
+    SELECT
+        viag.ITINERARIO,
+        SUM(qres.VALOR) AS Soma_Hospedagem
+    FROM
+        VIAGEM viag
+    JOIN QUARTO_RESERVA qres ON viag.NAVE = qres.NAVE_VIAGEM AND viag.DATA = qres.DATA_VIAGEM
+    GROUP BY
+        viag.ITINERARIO
+) hosp ON itin.NOME = hosp.ITINERARIO
+ORDER BY
+    itin.NOME;
