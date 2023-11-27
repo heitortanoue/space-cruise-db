@@ -237,3 +237,51 @@ LEFT JOIN (
 ) hosp ON itin.NOME = hosp.ITINERARIO
 ORDER BY
     itin.NOME;
+
+-- Gastos por passageiro, considerando todas as viagens/reservas
+SELECT
+    pess.NOME AS Passageiro,
+    COALESCE(prod.Soma_Produtos, 0) AS Soma_Produtos,
+    COALESCE(serv.Soma_Servicos, 0) AS Soma_Servicos,
+    COALESCE(hosp.Soma_Hospedagem, 0) AS Soma_Hospedagem,
+    COALESCE(prod.Soma_Produtos, 0) + COALESCE(serv.Soma_Servicos, 0) + COALESCE(hosp.Soma_Hospedagem, 0) AS Soma_Total
+FROM
+    PASSAGEIRO pass
+JOIN PESSOA pess ON pass.CPI = pess.CPI
+LEFT JOIN (
+    SELECT
+        hosp.PASSAGEIRO,
+        SUM(prod.VALOR * comp.QUANTIDADE) AS Soma_Produtos
+    FROM
+        HOSPEDAGEM hosp
+    JOIN RESERVAS res ON hosp.QUARTO_RESERVA = res.QUARTO_RESERVA
+    JOIN COMPRA comp ON res.QUARTO_RESERVA = comp.QUARTO_RESERVA
+    JOIN PRODUTOS prod ON comp.COD_BARRAS = prod.COD_BARRAS
+    GROUP BY
+        hosp.PASSAGEIRO
+) prod ON pass.CPI = prod.PASSAGEIRO
+LEFT JOIN (
+    SELECT
+        hosp.PASSAGEIRO,
+        SUM(serv.VALOR) AS Soma_Servicos
+    FROM
+        HOSPEDAGEM hosp
+    JOIN RESERVAS res ON hosp.QUARTO_RESERVA = res.QUARTO_RESERVA
+    JOIN CONTRATACAO_SERVICO contr ON res.QUARTO_RESERVA = contr.QUARTO_RESERVA
+    JOIN SERVICO_PRESTADO serpre ON contr.FUNCIONARIO = serpre.FUNCIONARIO_COMUM AND contr.HORARIO = serpre.HORARIO
+    JOIN SERVICOS serv ON serpre.COD_SERVICO = serv.COD_BARRAS
+    GROUP BY
+        hosp.PASSAGEIRO
+) serv ON pass.CPI = serv.PASSAGEIRO
+LEFT JOIN (
+    SELECT
+        hosp.PASSAGEIRO,
+        SUM(qres.VALOR) AS Soma_Hospedagem
+    FROM
+        HOSPEDAGEM hosp
+    JOIN QUARTO_RESERVA qres ON hosp.QUARTO_RESERVA = qres.ID
+    GROUP BY
+        hosp.PASSAGEIRO
+) hosp ON pass.CPI = hosp.PASSAGEIRO
+ORDER BY
+    pess.NOME;
