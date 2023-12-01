@@ -1,17 +1,3 @@
--- Consulta de itinerário de viagem
-SELECT
-    i.NOME AS Itinerario,
-    p.NOME AS Parada,
-    pi.ORDEM,
-    pi.DURACAO
-FROM
-    ITINERARIO i
-    JOIN PARADAS_ITINERARIO pi ON i.NOME = pi.NOME_ITINERARIO
-    JOIN PARADA p ON pi.NOME_PARADA = p.NOME
-ORDER BY
-    i.NOME,
-    pi.ORDEM;
-
 -- Consultar as próximas viagens que precisam de tripulantes / capitão
     SELECT
         v.NAVE,
@@ -32,105 +18,6 @@ ORDER BY
     HAVING
         COUNT(f.CPI) < m.TRIPULANTES_NECESSARIOS;
 
--- Verificação de quartos dísponíveis para uma data
-SELECT
-    qr.MODELO_NAVE_QUARTO AS MODELO_NAVE,
-    v.ITINERARIO,
-    qr.NUMERO_QUARTO
-FROM
-    QUARTO_RESERVA qr
-    JOIN VIAGEM v ON qr.NAVE_VIAGEM = v.NAVE
-        AND qr.DATA_VIAGEM = v.DATA
-WHERE
-    qr.DATA_VIAGEM = '{{DATA_VIAGEM}}'
-    AND qr.DISPONIBILIDADE = '1';
-
--- Lista de passageiros para uma viagem
-SELECT
-    p.CPI,
-    p.NOME AS Passageiro
-FROM
-    VIAGEM v
-    JOIN QUARTO_RESERVA qr ON v.NAVE = qr.NAVE_VIAGEM
-        AND v.DATA = qr.DATA_VIAGEM
-    JOIN HOSPEDAGEM h ON qr.ID = h.QUARTO_RESERVA
-    JOIN PESSOA p ON h.PASSAGEIRO = p.CPI
-WHERE
-    v.NAVE = '{{NUMERO_SERIE_NAVE}}'
-    AND v.DATA = '{{DATA_DA_VIAGEM}}';
-
--- Restrições alimentares dos passageiros
-SELECT
-    p.CPI,
-    p.NOME AS Passageiro,
-    ra.RESTRICAO
-FROM
-    HOSPEDAGEM h
-    JOIN PESSOA p ON h.PASSAGEIRO = p.CPI
-    JOIN RESTRICOES_ALIMENTARES ra ON p.CPI = ra.CPI
-WHERE
-    h.QUARTO_RESERVA IN (
-        SELECT
-            ID
-        FROM
-            QUARTO_RESERVA
-        WHERE
-            NAVE_VIAGEM = '{{NUMERO_SERIE_NAVE}}'
-            AND DATA_VIAGEM = '{{DATA_DA_VIAGEM}}'
-    );
-
--- Relatório de vendas de produtos por itinerário
-SELECT
-    i.NOME AS Itinerario,
-    SUM(p.VALOR * c.QUANTIDADE) AS Vendas_Totais
-FROM
-    ITINERARIO i
-    JOIN PRODUTOS_ITINERARIO pi ON i.NOME = pi.NOME_ITINERARIO
-    JOIN PRODUTOS p ON pi.COD_BARRAS_PRODUTO = p.COD_BARRAS
-    JOIN COMPRA c ON p.COD_BARRAS = c.COD_BARRAS
-GROUP BY
-    i.NOME;
-
--- Produtos mais vendidos em viagens que passam por um planeta
-SELECT
-    PR.nome,
-    SUM(C .quantidade) AS total_vendido
-FROM
-    compra AS C
-    JOIN produtos AS PR ON C .cod_barras = PR.cod_barras
-WHERE
-    C.quarto_reserva IN (
-        SELECT
-            QR.id
-        FROM
-            quarto_reserva AS QR
-            JOIN viagem AS V ON QR.nave_viagem = V.nave
-            AND QR.data_viagem = V.data
-            JOIN itinerario AS I ON V.itinerario = I.nome
-            JOIN paradas_itinerario AS PI ON I.nome = PI.nome_itinerario
-            JOIN parada AS P ON PI.nome_parada = P.nome
-        WHERE
-            P.tipo = 'PLANETA'
-            AND P.nome = '{{PLANETA}}'
-    )
-GROUP BY
-    PR.nome
-ORDER BY
-    total_vendido DESC;
-
--- Capacidade e ocupação das naves
-SELECT
-    m.NOME AS modelo_nave,
-    SUM(q.VAGAS) AS capacidade_total,
-    COUNT(h.PASSAGEIRO) AS ocupacao_atual
-FROM
-    MODELO_NAVE m
-    JOIN QUARTO q ON m.NOME = q.MODELO_NAVE
-    JOIN QUARTO_RESERVA qr ON q.MODELO_NAVE = qr.MODELO_NAVE_QUARTO
-    AND q.NUMERO = qr.NUMERO_QUARTO
-    LEFT JOIN HOSPEDAGEM h ON qr.ID = h.QUARTO_RESERVA
-GROUP BY
-    m.NOME;
 
 -- Funcionários comuns que ganham mais que a média de seu cargo
 SELECT
@@ -155,24 +42,29 @@ FROM
 WHERE
     f.SALARIO > MEDIA_CARGO.MEDIA_SALARIAL;
 
--- Passageiros que nunca viajaram em uma rota (divisão relacional)
+
+-- Passageiros que viajaram em todas as viagens de um itinerário (DIVISÃO RELACIONAL)
 SELECT
-    pe.NOME
+    p.CPI AS CPI,
+    p.NOME AS Passageiro
 FROM
-    PASSAGEIRO pa
-    JOIN PESSOA pe ON pa.CPI = pe.CPI
-WHERE
-    pa.CPI NOT IN (
-        SELECT
-            h.PASSAGEIRO
-        FROM
-            HOSPEDAGEM h
-            JOIN QUARTO_RESERVA qr ON h.QUARTO_RESERVA = qr.ID
-            JOIN VIAGEM v ON QR.nave_viagem = v.NAVE
-            AND qr.DATA_VIAGEM = v.DATA
-        WHERE
-            v.ITINERARIO = '{{ROTA}}'
-    );
+    pessoa p
+JOIN passageiro pa
+ON p.CPI = pa.CPI
+WHERE NOT EXISTS (
+    (
+        SELECT v.NAVE, v.DATA FROM viagem v
+        WHERE v.ITINERARIO = {{ITINERARIO}}
+    )
+    EXCEPT (
+        SELECT qr.NAVE_VIAGEM, qr.DATA_VIAGEM
+        FROM quarto_reserva qr
+        JOIN hospedagem h ON qr.ID = h.QUARTO_RESERVA
+        WHERE h.PASSAGEIRO = p.CPI
+    )
+)
+
+
 
 -- Capitães disponíveis para pilotar uma viagem
 SELECT
@@ -183,10 +75,10 @@ FROM
     CAPITAO c
     JOIN LICENCAS_PERMITIDAS lp ON c.LICENCA = lp.LICENCA
     LEFT JOIN VIAGEM v ON c.CPI = v.CPI_CAPITAO
-    AND v.DATA = '{{DATA_DA_VIAGEM}}'
+    AND v.DATA = {{DATA_DA_VIAGEM}}
 WHERE
     v.CPI_CAPITAO IS NULL
-    AND lp.NOME_MODELO = '{{MODELO_NAVE}}';
+    AND lp.NOME_MODELO = {{MODELO_NAVE}};
 
 
 -- Gastos por itinerário
@@ -334,7 +226,7 @@ WHERE
         SELECT 1
         FROM TRABALHO_COMUM tc
         WHERE tc.CPI_COMUM = sp.FUNCIONARIO_COMUM
-        AND tc.NAVE_VIAGEM = '{{Nave Viagem}}'
+        AND tc.NAVE_VIAGEM = {{Nave Viagem}}
         AND sp.HORARIO > CURRENT_TIME
     );
 
@@ -348,7 +240,7 @@ SELECT
 FROM
     VIAGEM v
 WHERE
-    v.ITINERARIO = '{{Itinerário desejado}}'
+    v.ITINERARIO = {{Itinerário desejado}}
     AND v.DATA >= CURRENT_DATE
 ORDER BY
     v.DATA ASC;

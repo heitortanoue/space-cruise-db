@@ -4,6 +4,10 @@ import psycopg2
 from termcolor import colored
 from config import config
 
+# dar rollback depois das consultas e insercoes (em tudo ate criacao)
+# ver os lefts joins
+# deixar apenas as 5 conultas mais complexas
+
 def create_tables():
     conn = None
     try:
@@ -50,6 +54,7 @@ def create_tables():
         conn.commit()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+        conn.rollback()
 
     finally:
         if conn is not None:
