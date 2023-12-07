@@ -20,49 +20,49 @@
 
 
 -- Funcionários comuns que ganham mais que a média de seu cargo
-SELECT
-    f.NUM_FUNCIONAL,
-    p.NOME,
-    f.SALARIO,
-    c.PROFISSAO_ESP,
-    MEDIA_CARGO.MEDIA_SALARIAL AS MEDIA_SALARIAL_CARGO
-FROM
-    COMUM c
-    JOIN PESSOA p ON c.CPI = p.CPI
-    JOIN FUNCIONARIO f ON p.CPI = f.CPI
-    INNER JOIN (
-        SELECT
-            c.PROFISSAO_ESP,
-            AVG(f.SALARIO) AS MEDIA_SALARIAL
-        FROM
-            FUNCIONARIO f JOIN COMUM c ON f.CPI = c.CPI
-        GROUP BY
-            c.PROFISSAO_ESP
-    ) AS MEDIA_CARGO ON c.PROFISSAO_ESP = MEDIA_CARGO.PROFISSAO_ESP
-WHERE
-    f.SALARIO > MEDIA_CARGO.MEDIA_SALARIAL;
+    SELECT
+        f.NUM_FUNCIONAL,
+        p.NOME,
+        f.SALARIO,
+        c.PROFISSAO_ESP,
+        MEDIA_CARGO.MEDIA_SALARIAL AS MEDIA_SALARIAL_CARGO
+    FROM
+        COMUM c
+        JOIN PESSOA p ON c.CPI = p.CPI
+        JOIN FUNCIONARIO f ON p.CPI = f.CPI
+        INNER JOIN (
+            SELECT
+                c.PROFISSAO_ESP,
+                AVG(f.SALARIO) AS MEDIA_SALARIAL
+            FROM
+                FUNCIONARIO f JOIN COMUM c ON f.CPI = c.CPI
+            GROUP BY
+                c.PROFISSAO_ESP
+        ) AS MEDIA_CARGO ON c.PROFISSAO_ESP = MEDIA_CARGO.PROFISSAO_ESP
+    WHERE
+        f.SALARIO > MEDIA_CARGO.MEDIA_SALARIAL;
 
 
 -- Passageiros que viajaram em todas as viagens de um itinerário (DIVISÃO RELACIONAL)
-SELECT
-    p.CPI AS CPI,
-    p.NOME AS Passageiro
-FROM
-    pessoa p
-JOIN passageiro pa
-ON p.CPI = pa.CPI
-WHERE NOT EXISTS (
-    (
-        SELECT v.NAVE, v.DATA FROM viagem v
-        WHERE v.ITINERARIO = {{ITINERARIO}}
+    SELECT
+        p.CPI AS CPI,
+        p.NOME AS Passageiro
+    FROM
+        pessoa p
+    JOIN passageiro pa
+    ON p.CPI = pa.CPI
+    WHERE NOT EXISTS (
+        (
+            SELECT v.NAVE, v.DATA FROM viagem v
+            WHERE v.ITINERARIO = {{ITINERARIO}}
+        )
+        EXCEPT (
+            SELECT qr.NAVE_VIAGEM, qr.DATA_VIAGEM
+            FROM quarto_reserva qr
+            JOIN hospedagem h ON qr.ID = h.QUARTO_RESERVA
+            WHERE h.PASSAGEIRO = p.CPI
+        )
     )
-    EXCEPT (
-        SELECT qr.NAVE_VIAGEM, qr.DATA_VIAGEM
-        FROM quarto_reserva qr
-        JOIN hospedagem h ON qr.ID = h.QUARTO_RESERVA
-        WHERE h.PASSAGEIRO = p.CPI
-    )
-)
 
 
 -- Capitães disponíveis para pilotar uma viagem
@@ -101,18 +101,3 @@ LEFT JOIN SERVICO_PRESTADO serpre ON contr.FUNCIONARIO = serpre.FUNCIONARIO_COMU
 LEFT JOIN SERVICOS serv ON serpre.COD_SERVICO = serv.COD_BARRAS
 GROUP BY itin.NOME
 ORDER BY itin.NOME;
-
--- Próximas viagens que realizam um determinado itinerário
-SELECT
-    v.NAVE,
-    v.DATA,
-    v.CPI_CAPITAO,
-    v.ITINERARIO,
-    v.DURACAO
-FROM
-    VIAGEM v
-WHERE
-    v.ITINERARIO = {{Itinerário desejado}}
-    AND v.DATA >= CURRENT_DATE
-ORDER BY
-    v.DATA ASC;
