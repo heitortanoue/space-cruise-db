@@ -80,6 +80,22 @@ WHERE
     AND lp.NOME_MODELO = {{MODELO_NAVE}};
 
 
+-- Próximas viagens que realizam um determinado itinerário
+SELECT
+    v.NAVE,
+    v.DATA,
+    v.CPI_CAPITAO,
+    v.ITINERARIO,
+    v.DURACAO
+FROM
+    VIAGEM v
+WHERE
+    v.ITINERARIO = {{Itinerário desejado}}
+    AND v.DATA >= CURRENT_DATE
+ORDER BY
+    v.DATA ASC;
+
+
 -- Gastos por itinerário
 SELECT
   itin.NOME AS Nome_Itinerario,
