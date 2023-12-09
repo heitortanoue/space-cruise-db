@@ -27,6 +27,8 @@ def inserir_passageiro(cpi):
     conn.commit()
     print("Passageiro inserido com sucesso!")
   except Exception as e:
+    # ROLLBACK
+    conn.rollback()
     print("Erro ao inserir passageiro: ", e)
 
 
@@ -38,6 +40,8 @@ def inserir_funcionario(cpi, num_funcional, cargo, salario):
     conn.commit()
     print("Funcionario inserido com sucesso!")
   except Exception as e:
+    # ROLLBACK
+    conn.rollback()
     print("Erro ao inserir funcionario: ", e)
 
 def inserir_hospedagem(quarto_reserva, passageiro):
@@ -48,6 +52,8 @@ def inserir_hospedagem(quarto_reserva, passageiro):
     conn.commit()
     print("Hospedagem inserida com sucesso!")
   except Exception as e:
+    # ROLLBACK
+    conn.rollback()
     print("Erro ao inserir hospedagem: ", e)
 
 def inserir_produtos(cod_barras, nome, valor):
@@ -58,6 +64,8 @@ def inserir_produtos(cod_barras, nome, valor):
     conn.commit()
     print("Produto inserido com sucesso!")
   except Exception as e:
+    # ROLLBACK
+    conn.rollback()
     print("Erro ao inserir produto: ", e)
 
 def inserir_servicos(cod_barras, nome, valor):
@@ -68,4 +76,6 @@ def inserir_servicos(cod_barras, nome, valor):
     conn.commit()
     print("Servico inserido com sucesso!")
   except Exception as e:
+    # ROLLBACK
+    conn.rollback()
     print("Erro ao inserir servico: ", e)

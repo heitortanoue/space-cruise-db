@@ -57,17 +57,20 @@ def inserir_servicos():
 
     functions.inserir_servicos(cod_barras, nome, valor)
 
-print("1 - Inserir pessoa")
-print("2 - Inserir passageiro")
-print("3 - Inserir funcionario")
-print("4 - Inserir hospedagem")
-print("5 - Inserir produtos")
-print("6 - Inserir servicos")
+def exibir_opcoes():
+    print("\nOpções:")
+    print("1 - Inserir pessoa")
+    print("2 - Inserir passageiro")
+    print("3 - Inserir funcionario")
+    print("4 - Inserir hospedagem")
+    print("5 - Inserir produtos")
+    print("6 - Inserir servicos")
+    print("0 - Sair")
 
-print("0 - Sair")
-
-operacao = int(input("\nDigite o código do comando: "))
-while(operacao != 0):
+operacao = -1
+while operacao != 0:
+    exibir_opcoes()
+    operacao = int(input("\nDigite o código do comando: "))
     if operacao == 1:
         inserir_pessoa()
     elif operacao == 2:
@@ -80,8 +83,6 @@ while(operacao != 0):
         inserir_produtos()
     elif operacao == 6:
         inserir_servicos()
-
-    operacao = int(input("\nDigite o código do comando: "))
     
 
 # Fechar cursor e conexão
