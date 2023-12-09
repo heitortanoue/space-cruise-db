@@ -1,5 +1,6 @@
 import psycopg2
 from config import config
+from termcolor import colored
 
 params = config()
 
@@ -13,11 +14,12 @@ def inserir_pessoa(cpi, nome, tipo, senha, planeta_origem, data_nascimento, espe
     values = (cpi, nome, tipo, senha, planeta_origem, data_nascimento, especie)
     cur.execute(query, values)
     conn.commit()
-    print("Pessoa inserida com sucesso!")
+    print(colored("Pessoa inserida com sucesso!", "green"))
   except Exception as e:
     # ROLLBACK
     conn.rollback()
-    print("Erro ao inserir pessoa: ", e)
+    print(colored("Erro ao inserir pessoa: ", "red"))
+    print(colored(e, "red"));
 
 def inserir_passageiro(cpi):
   try:
@@ -25,11 +27,12 @@ def inserir_passageiro(cpi):
     values = (cpi,)
     cur.execute(query, values)
     conn.commit()
-    print("Passageiro inserido com sucesso!")
+    print(colored("Passageiro inserido com sucesso!", "green"))
   except Exception as e:
     # ROLLBACK
     conn.rollback()
-    print("Erro ao inserir passageiro: ", e)
+    print(colored("Erro ao inserir passageiro: ", "red"))
+    print(colored(e, "red"))
 
 
 def inserir_funcionario(cpi, num_funcional, cargo, salario):
@@ -38,11 +41,12 @@ def inserir_funcionario(cpi, num_funcional, cargo, salario):
     values = (cpi, num_funcional, cargo, salario)
     cur.execute(query, values)
     conn.commit()
-    print("Funcionario inserido com sucesso!")
+    print(colored("Funcionario inserido com sucesso!", "green"))
   except Exception as e:
     # ROLLBACK
     conn.rollback()
-    print("Erro ao inserir funcionario: ", e)
+    print(colored("Erro ao inserir funcionario: ", "red"))
+    print(colored(e, "red"))
 
 def inserir_hospedagem(quarto_reserva, passageiro):
   try:
@@ -50,11 +54,12 @@ def inserir_hospedagem(quarto_reserva, passageiro):
     values = (quarto_reserva, passageiro)
     cur.execute(query, values)
     conn.commit()
-    print("Hospedagem inserida com sucesso!")
+    print(colored("Hospedagem inserida com sucesso!", "green"))
   except Exception as e:
     # ROLLBACK
     conn.rollback()
-    print("Erro ao inserir hospedagem: ", e)
+    print(colored("Erro ao inserir hospedagem: ", "red"))
+    print(colored(e, "red"))
 
 def inserir_produtos(cod_barras, nome, valor):
   try:
@@ -62,11 +67,12 @@ def inserir_produtos(cod_barras, nome, valor):
     values = (cod_barras, nome, valor)
     cur.execute(query, values)
     conn.commit()
-    print("Produto inserido com sucesso!")
+    print(colored("Produto inserido com sucesso!", "green"))
   except Exception as e:
     # ROLLBACK
     conn.rollback()
-    print("Erro ao inserir produto: ", e)
+    print(colored("Erro ao inserir produto: ", "red"))
+    print(colored(e, "red"))
 
 def inserir_servicos(cod_barras, nome, valor):
   try:
@@ -74,8 +80,9 @@ def inserir_servicos(cod_barras, nome, valor):
     values = (cod_barras, nome, valor)
     cur.execute(query, values)
     conn.commit()
-    print("Servico inserido com sucesso!")
+    print(colored("Servico inserido com sucesso!", "green"))
   except Exception as e:
     # ROLLBACK
     conn.rollback()
-    print("Erro ao inserir servico: ", e)
+    print(colored("Erro ao inserir servico: ", "red"))
+    print(colored(e, "red"))

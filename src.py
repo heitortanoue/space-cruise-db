@@ -1,5 +1,6 @@
 import psycopg2
 from config import config
+from termcolor import colored
 import functions
 
 params = config()
@@ -10,40 +11,41 @@ cur = conn.cursor()
 
 def inserir_pessoa():
     print("\nInserindo pessoa")
-    cpi = (input('Digite o cpi da pessoa: '))
+    # cpi = (input('Digite o cpi da pessoa: '))
+    cpi = (input(f'{"Digite o CPI da pessoa"} {colored("(ex: 123.123.123-AA)", "grey")}: '))
     nome = input('Digite o nome da pessoa: ')
-    tipo = input('Digite o tipo da pessoa: ')
+    tipo = (input(f'{"Digite o tipo da pessoa"} {colored("(PASSAGEIRO OU FUNCIONARIO)", "grey")}: '))
     senha = input('Digite a senha da pessoa: ')
     planeta_origem = input('Digite o planeta de origem da pessoa: ')
-    data_nascimento = input('Digite a data de nascimento da pessoa: ')
+    data_nascimento = (input(f'{"Digite a data de nascimento pessoa"} {colored("(ex: YYYY-MM-DD)", "grey")}: '))
     especie = input('Digite a especie da pessoa: ')
 
     functions.inserir_pessoa(cpi, nome, tipo, senha, planeta_origem, data_nascimento, especie)
 
 def inserir_passageiro():
     print("\nInserindo passageiro")
-    cpi = input('Digite o cpi do passageiro: ')
+    cpi = (input(f'{"Digite o CPI de um passageiro existente"} {colored("(ex: 123.123.123-AA)", "grey")}: '))
 
     functions.inserir_passageiro(cpi)
 
 def inserir_funcionario():
     print("\nInserindo funcionario")
-    cpi = (input('Digite o cpi do funcionario: '))
-    num_funcional = input('Digite o numero funcional do funcionario: ')
-    cargo = input('Digite o cargo do funcionario: ')
+    cpi = (input(f'{"Digite o CPI de um funcionario existente"} {colored("(ex: 123.123.123-AA)", "grey")}: '))
+    num_funcional = (input(f'{"Digite o numero funcional do funcionario"} {colored("(ex: 123456789)", "grey")}: '))
+    cargo = tipo = (input(f'{"Digite o cargo do funcionario"} {colored("(CAPITAO OU COMISSARIO OU COMUM)", "grey")}: '))
     salario = input('Digite o salario do funcionario: ')
 
     functions.inserir_funcionario(cpi,num_funcional, cargo, salario)
 
 def inserir_hospedagem():
     print("\nInserindo hospedagem")
-    quarto_reserva = (input('Digite o numero do quarto da reserva: '))
-    passageiro = input('Digite o cpi do passageiro: ')
+    quarto_reserva = (input('Digite o numero do quarto da reserva existente: '))
+    passageiro = cpi = (input(f'{"Digite o CPI de um passageiro existente"} {colored("(ex: 123.123.123-AA)", "grey")}: '))
 
     functions.inserir_hospedagem(quarto_reserva, passageiro)
 
 def inserir_produtos():
-    cod_barras = (input('Digite o codigo de barras do produto: '))
+    cod_barras = (input(f'{"Digite o codigo de barras de um produto novo"} {colored("(ex: 1 123456 123456)", "grey")}: '))
     nome = (input('Digite o nome do produto: '))
     valor = input('Digite o valor do produto: ')
 
@@ -51,7 +53,7 @@ def inserir_produtos():
 
 def inserir_servicos():
     print("\nInserindo servico")
-    cod_barras = (input('Digite o codigo de barras do servico: '))
+    cod_barras = (input(f'{"Digite o codigo de barras de um servico novo"} {colored("(ex: 1 123456 123456)", "grey")}: '))
     nome = (input('Digite o nome do servico: '))
     valor = input('Digite o valor do servico: ')
 
@@ -63,8 +65,8 @@ def exibir_opcoes():
     print("2 - Inserir passageiro")
     print("3 - Inserir funcionario")
     print("4 - Inserir hospedagem")
-    print("5 - Inserir produtos")
-    print("6 - Inserir servicos")
+    print("5 - Inserir um novo produto")
+    print("6 - Inserir um novo servico")
     print("0 - Sair")
 
 operacao = -1
