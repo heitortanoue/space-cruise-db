@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import psycopg2
-from psycopg2.extras import RealDictCursor
 from tabulate import tabulate
 from termcolor import colored
 from config import config
@@ -16,6 +15,8 @@ def query_data(query):
         cur = conn.cursor()
 
         campos_personalizaveis = get_query_fields(query)
+
+        dict_campos_personalizaveis = {}
         if campos_personalizaveis:
             print(colored("Esta consulta possui campos personalizáveis:", "yellow"))
             for campo in campos_personalizaveis:
@@ -24,11 +25,18 @@ def query_data(query):
                     print(f'{colored(campo, "cyan")} {colored("(ex: 2020-01-01)", "grey")}: ', end="")
                 else:
                     print(colored(f"{campo}: ", 'cyan'), end="")
-                valor = input()
-                query = set_query_fields(query, {campo: valor.upper()})
 
-        # Executa a consulta selecionada
-        cur.execute(query)
+                valor = input()
+
+                # Coloca o valor no dicionário de campos personalizáveis
+                dict_campos_personalizaveis[campo] = valor
+
+        # Substitui os campos personalizáveis por placeholders -> %(NOME_DO_CAMPO)s
+        query = set_query_fields(query, dict_campos_personalizaveis)
+
+        # Executa a consulta selecionada seguindo o padrão do psycopg2
+        # Essa abordagem é segura contra ataques de injeção de SQL
+        cur.execute(query, dict_campos_personalizaveis)
 
         rows = cur.fetchall()
 
@@ -47,6 +55,7 @@ def query_data(query):
     except (Exception, psycopg2.DatabaseError) as error:
         print(colored("\n[ERRO] Erro ao executar a consulta.", 'red'))
         print(colored(error, 'grey'))
+        conn.rollback()
     finally:
         if conn is not None:
             conn.close()

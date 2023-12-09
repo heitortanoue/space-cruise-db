@@ -30,8 +30,8 @@ def get_query_fields(query):
         start = end + 2
     return fields
 
-def set_query_fields(query, fields):
+def set_query_fields(query: str, dict: dict):
     """Substitui os campos personalizaveis de uma consulta pelos valores fornecidos."""
-    for field in fields:
-        query = query.replace("{{" + field + "}}", fields[field])
+    for key in dict:
+        query = query.replace("{{" + key + "}}", f'%({key})s')
     return query

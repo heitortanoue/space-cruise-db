@@ -15,6 +15,8 @@ def inserir_pessoa(cpi, nome, tipo, senha, planeta_origem, data_nascimento, espe
     conn.commit()
     print("Pessoa inserida com sucesso!")
   except Exception as e:
+    # ROLLBACK
+    conn.rollback()
     print("Erro ao inserir pessoa: ", e)
 
 def inserir_passageiro(cpi):
