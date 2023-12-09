@@ -8,6 +8,9 @@ params = config()
 conn = psycopg2.connect(**params)
 cur = conn.cursor()
 
+"""
+Função para inserir uma pessoa no sistema.
+"""
 def inserir_pessoa(cpi, nome, tipo, senha, planeta_origem, data_nascimento, especie):
   try:
     query = "INSERT INTO PESSOA (cpi, nome, tipo, senha, planeta_origem, data_nascimento, especie) VALUES (%s, %s, %s, %s, %s, %s, %s)"
@@ -21,6 +24,9 @@ def inserir_pessoa(cpi, nome, tipo, senha, planeta_origem, data_nascimento, espe
     print(colored("Erro ao inserir pessoa: ", "red"))
     print(colored(e, "red"));
 
+""""
+Função para inserir um passageiro no sistema.
+"""
 def inserir_passageiro(cpi):
   try:
     query = "INSERT INTO PASSAGEIRO (cpi) VALUES (%s)"
@@ -34,7 +40,9 @@ def inserir_passageiro(cpi):
     print(colored("Erro ao inserir passageiro: ", "red"))
     print(colored(e, "red"))
 
-
+"""
+Função para inserir um funcionário no sistema.
+"""
 def inserir_funcionario(cpi, num_funcional, cargo, salario):
   try:
     query = "INSERT INTO FUNCIONARIO (cpi, num_funcional, cargo, salario) VALUES (%s, %s, %s, %s)"
@@ -48,6 +56,9 @@ def inserir_funcionario(cpi, num_funcional, cargo, salario):
     print(colored("Erro ao inserir funcionario: ", "red"))
     print(colored(e, "red"))
 
+"""
+Função para inserir uma reserva no sistema.
+"""
 def inserir_hospedagem(quarto_reserva, passageiro):
   try:
     query = "INSERT INTO HOSPEDAGEM (quarto_reserva, passageiro) VALUES (%s, %s)"
@@ -61,6 +72,9 @@ def inserir_hospedagem(quarto_reserva, passageiro):
     print(colored("Erro ao inserir hospedagem: ", "red"))
     print(colored(e, "red"))
 
+"""
+Função para inserir uma reserva no sistema.
+"""
 def inserir_produtos(cod_barras, nome, valor):
   try:
     query = "INSERT INTO PRODUTOS (cod_barras, nome, valor) VALUES (%s, %s, %s)"
@@ -74,6 +88,9 @@ def inserir_produtos(cod_barras, nome, valor):
     print(colored("Erro ao inserir produto: ", "red"))
     print(colored(e, "red"))
 
+"""
+Função para inserir um serviço no sistema.
+"""
 def inserir_servicos(cod_barras, nome, valor):
   try:
     query = "INSERT INTO SERVICOS (cod_barras, nome, valor) VALUES (%s, %s, %s)"
